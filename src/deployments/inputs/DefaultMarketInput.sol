@@ -26,6 +26,14 @@ contract DefaultMarketInput is MarketInput {
     config.flashLoanPremiumTotal = 0.0005e4;
     config.flashLoanPremiumToProtocol = 0.0004e4;
 
+    config.networkBaseTokenPriceInUsdProxyAggregator = address(
+      0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f
+    );
+
+    config.marketReferenceCurrencyPriceInUsdProxyAggregator = address(
+      0x1429859428C0aBc9C2C47C8Ee9FBaf82cFA0F20f
+    );
+
     return (roles, config, flags, deployedContracts);
   }
 }

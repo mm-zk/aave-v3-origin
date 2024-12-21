@@ -29,7 +29,53 @@ abstract contract DeployAaveV3MarketBatchedBase is DeployUtils, MarketInput, Scr
 
     vm.startBroadcast();
     report = AaveV3BatchOrchestration.deployAaveV3(msg.sender, roles, config, flags, report);
+
+    IPoolConfigurator aa = IPoolConfigurator(report.poolConfiguratorProxy);
+
+    IDefaultInterestRateStrategyV2.InterestRateData
+      memory interestRate = IDefaultInterestRateStrategyV2.InterestRateData({
+        optimalUsageRatio: 8000,
+        baseVariableBorrowRate: 0,
+        variableRateSlope1: 700,
+        variableRateSlope2: 7500
+      });
+
+    ConfiguratorInputTypes.InitReserveInput[]
+      memory reserves = new ConfiguratorInputTypes.InitReserveInput[](1);
+
+    address magicHelper = address(0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff);
+
+    reserves[0] = ConfiguratorInputTypes.InitReserveInput({
+      aTokenImpl: report.aToken,
+      variableDebtTokenImpl: report.variableDebtToken,
+      useVirtualBalance: true,
+      interestRateStrategyAddress: report.defaultInterestRateStrategy,
+      underlyingAsset: address(0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD),
+      treasury: report.treasury,
+      incentivesController: address(0), // no incentives
+      aTokenName: 'EXM token',
+      aTokenSymbol: 'EXM',
+      variableDebtTokenName: 'VAR token',
+      variableDebtTokenSymbol: 'VAR',
+      params: bytes(''),
+      interestRateData: abi.encode(interestRate)
+    });
+    aa.initReserves(reserves);
+
+    IAaveOracle aaveOracle = IAaveOracle(report.aaveOracle);
+    aaveOracle.setFallbackOracle(magicHelper);
+
     vm.stopBroadcast();
+
+    IUiPoolDataProviderV3 uiPoolProvider = IUiPoolDataProviderV3(report.uiPoolDataProvider);
+    uiPoolProvider.getReservesData(IPoolAddressesProvider(report.poolAddressesProvider));
+
+    IUiIncentiveDataProviderV3 uiIncentivesProvider = IUiIncentiveDataProviderV3(
+      report.uiIncentiveDataProvider
+    );
+    uiIncentivesProvider.getReservesIncentivesData(
+      IPoolAddressesProvider(report.poolAddressesProvider)
+    );
 
     // Write market deployment JSON report at /reports
     IMetadataReporter metadataReporter = IMetadataReporter(

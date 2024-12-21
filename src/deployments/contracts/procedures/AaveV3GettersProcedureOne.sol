@@ -7,6 +7,7 @@ import {UiIncentiveDataProviderV3} from '../../../contracts/helpers/UiIncentiveD
 import {IEACAggregatorProxy} from '../../../contracts/helpers/interfaces/IEACAggregatorProxy.sol';
 import {AaveProtocolDataProvider} from '../../../contracts/helpers/AaveProtocolDataProvider.sol';
 import {IPoolAddressesProvider} from '../../../contracts/interfaces/IPoolAddressesProvider.sol';
+import 'forge-std/console.sol';
 
 contract AaveV3GettersProcedureOne {
   struct GettersReportBatchOne {
@@ -28,16 +29,19 @@ contract AaveV3GettersProcedureOne {
     report.protocolDataProvider = address(
       new AaveProtocolDataProvider(IPoolAddressesProvider(poolAddressesProvider))
     );
+    console.log('Inside batch one');
     if (
       networkBaseTokenPriceInUsdProxyAggregator != address(0) &&
       marketReferenceCurrencyPriceInUsdProxyAggregator != address(0)
     ) {
+      console.log('deploying uipooldata provider');
       report.uiPoolDataProvider = address(
         new UiPoolDataProviderV3(
           IEACAggregatorProxy(networkBaseTokenPriceInUsdProxyAggregator),
           IEACAggregatorProxy(marketReferenceCurrencyPriceInUsdProxyAggregator)
         )
       );
+      console.log('deployed uipooldata provider: ', report.uiPoolDataProvider);
     }
 
     return report;
