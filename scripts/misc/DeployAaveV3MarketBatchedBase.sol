@@ -41,16 +41,19 @@ abstract contract DeployAaveV3MarketBatchedBase is DeployUtils, MarketInput, Scr
       });
 
     ConfiguratorInputTypes.InitReserveInput[]
-      memory reserves = new ConfiguratorInputTypes.InitReserveInput[](1);
+      memory reserves = new ConfiguratorInputTypes.InitReserveInput[](2);
 
     address magicHelper = address(0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff);
+    address firstERC = address(0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD);
+    address secondERC = address(0x51A1ceB83B83F1985a81C295d1fF28Afef186E02);
 
     reserves[0] = ConfiguratorInputTypes.InitReserveInput({
       aTokenImpl: report.aToken,
       variableDebtTokenImpl: report.variableDebtToken,
       useVirtualBalance: true,
       interestRateStrategyAddress: report.defaultInterestRateStrategy,
-      underlyingAsset: address(0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD),
+      // Manually deployed - via helper.
+      underlyingAsset: firstERC,
       treasury: report.treasury,
       incentivesController: address(0), // no incentives
       aTokenName: 'EXM token',
@@ -60,7 +63,27 @@ abstract contract DeployAaveV3MarketBatchedBase is DeployUtils, MarketInput, Scr
       params: bytes(''),
       interestRateData: abi.encode(interestRate)
     });
+    reserves[1] = ConfiguratorInputTypes.InitReserveInput({
+      aTokenImpl: report.aToken,
+      variableDebtTokenImpl: report.variableDebtToken,
+      useVirtualBalance: true,
+      interestRateStrategyAddress: report.defaultInterestRateStrategy,
+      // Manually deployed - via helper.
+      underlyingAsset: secondERC,
+      treasury: report.treasury,
+      incentivesController: address(0), // no incentives
+      aTokenName: 'EXM token2',
+      aTokenSymbol: 'EX2',
+      variableDebtTokenName: 'VAR token2',
+      variableDebtTokenSymbol: 'VA2',
+      params: bytes(''),
+      interestRateData: abi.encode(interestRate)
+    });
+
     aa.initReserves(reserves);
+
+    aa.configureReserveAsCollateral(firstERC, 7500, 8000, 10500);
+    aa.setReserveBorrowing(secondERC, true);
 
     IAaveOracle aaveOracle = IAaveOracle(report.aaveOracle);
     aaveOracle.setFallbackOracle(magicHelper);
