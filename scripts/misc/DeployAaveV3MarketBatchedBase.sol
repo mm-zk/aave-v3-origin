@@ -10,6 +10,7 @@ import {IMetadataReporter} from '../../src/deployments/interfaces/IMetadataRepor
 import {DeployUtils} from '../../src/deployments/contracts/utilities/DeployUtils.sol';
 import {AaveV3BatchOrchestration} from '../../src/deployments/projects/aave-v3-batched/AaveV3BatchOrchestration.sol';
 import {MarketInput} from '../../src/deployments/inputs/MarketInput.sol';
+import {AaveV3SetupBatch} from '../../src/deployments/projects/aave-v3-batched/batches/AaveV3SetupBatch.sol';
 
 abstract contract DeployAaveV3MarketBatchedBase is DeployUtils, MarketInput, Script {
   using stdJson for string;
@@ -43,9 +44,15 @@ abstract contract DeployAaveV3MarketBatchedBase is DeployUtils, MarketInput, Scr
     ConfiguratorInputTypes.InitReserveInput[]
       memory reserves = new ConfiguratorInputTypes.InitReserveInput[](2);
 
-    address magicHelper = address(0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff);
-    address firstERC = address(0xDC11f7E700A4c898AE5CAddB1082cFfa76512aDD);
-    address secondERC = address(0x51A1ceB83B83F1985a81C295d1fF28Afef186E02);
+    // 'Counter' script
+    // CHANGEHERE
+    address magicHelper = address(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+
+    //address magicHelper = address(0x49fd2BE640DB2910c2fAb69bB8531Ab6E76127ff);
+    // CHANGEHERE
+    address firstERC = address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    // CHANGEHERE
+    address secondERC = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
 
     reserves[0] = ConfiguratorInputTypes.InitReserveInput({
       aTokenImpl: report.aToken,
